@@ -28,7 +28,7 @@ export default function Update () {
     e.preventDefault();
     
     const options = {
-      method: "PATCH",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },

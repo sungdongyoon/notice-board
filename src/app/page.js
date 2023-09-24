@@ -11,14 +11,13 @@ const Page = () => {
   const [data, setData] = useState([]);
   useEffect(() => {
     setLoading(true);
-    fetch('https://my-json-server.typicode.com/sungdongyoon/notice-board/notices', {cache: 'no-store'})
+    fetch('/api/noticeData')
       .then(response => response.json())
       .then(result => {
-        setData([...result].reverse());
-        setLoading(false);
-        console.log(result)
+        setData(result)
       })
   }, [])
+  console.log("data", data);
   
   const [page, setPage] = useState(1);
   const [currentPost, setCurrentPost] = useState([]);
