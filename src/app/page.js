@@ -1,113 +1,97 @@
-import Image from 'next/image'
+"use client"
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import Loading from "./components/Loading";
+import Pagination from "react-js-pagination";
+import Link from "next/link";
+import dayjs from "dayjs";
+
+const Page = () => {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    setLoading(true);
+    fetch('https://my-json-server.typicode.com/sungdongyoon/notice-board/notices', {cache: 'no-store'})
+      .then(response => response.json())
+      .then(result => {
+        setData([...result].reverse());
+        setLoading(false);
+        console.log(result)
+      })
+  }, [])
+  
+  const [page, setPage] = useState(1);
+  const [currentPost, setCurrentPost] = useState([]);
+  const postPerPage = 10;
+  const indexOfLastPost = page * postPerPage;
+  const indexOfFirstPost = indexOfLastPost - postPerPage;
+
+  const handlePageChange = (page) => {
+    setPage(page);
+  };
+
+  const [result, setResult] = useState([]);
+  const filteredData = data.filter((it) => it.title.toLowerCase().includes(result));
+
+  const handleSearch = (e) => {
+    setResult(e.target.value.toLowerCase());
+  };
+
+  useEffect(() => {
+    setCurrentPost(data.slice(indexOfFirstPost, indexOfLastPost));
+  }, [data, page])
+  
+  useEffect(() => {
+    setCurrentPost(filteredData.slice(indexOfFirstPost, indexOfLastPost));
+  }, [result, page]);
+  
+  const now = dayjs();
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="main">
+      <div className="main_header">
+        <h1>공지사항</h1>
+        <div className="main_input">
+          <input onChange={(e) => handleSearch(e)} type="text" placeholder="검색어" value={result}/>
+          {result.length === 0 ?
+            <span className="input_icon">🔍</span> :
+            <span onClick={() => setResult("")} className="input_icon">❌</span>
+          }
         </div>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
+      <div className='notice_list'>
+        {!loading ? 
+          currentPost.length === 0 ?
+            <span className="notice_notification">공지사항이 없습니다.</span> :
+              currentPost.map((el) => (
+              <Link className="notice_list_wrap" href={`/notice/${el.id}`} key={el.id}>
+                <span className="notice_list_title">{el.title}</span>
+                <span className="notice_list_time">{
+                  now.diff(dayjs(el.time), "s") < 59 ? "방금 전" :
+                  now.diff(dayjs(el.time), "m") >= 1 && now.diff(dayjs(el.time), "m") <= 59 ? `${now.diff(dayjs(el.time), "m")}분 전` :
+                  now.diff(dayjs(el.time), "h") >= 1 && now.diff(dayjs(el.time), "h") <= 23 ? `${now.diff(dayjs(el.time), "h")}시간 전` : 
+                  now.diff(dayjs(el.time), "DD") >= 1 ? el.time : ""
+                }</span>
+              </Link>
+            ))
+            :
+          <Loading/>
+        }
       </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div className="page_select">
+        {currentPost.length !== 0 &&
+          <Pagination
+            activePage={page}
+            itemsCountPerPage={postPerPage}
+            totalItemsCount={filteredData.length}
+            pageRangeDisplayed={5}
+            prevPageText={"‹"}
+            nextPageText={"›"}
+            onChange={handlePageChange}
+          />
+        }
       </div>
-    </main>
+    </div>
   )
 }
+
+export default Page;
