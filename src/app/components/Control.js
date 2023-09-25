@@ -17,7 +17,7 @@ export function Control() {
       <button className="delete_btn" onClick={() => {
         if(confirm("정말 삭제하시겠습니까?")) {
           const options = {method: 'DELETE'}
-          fetch('https://my-json-server.typicode.com/sungdongyoon/notice-board/notices/'+ id, options)
+          fetch('http://localhost:9999/notices/'+ id, options)
             .then((response) => response.json())
             .then((result) => {
               router.push('/');

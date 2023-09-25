@@ -14,7 +14,7 @@ export default function Update () {
   const params = useParams();
   const id = params.id;
   useEffect(() => {
-    fetch('https://my-json-server.typicode.com/sungdongyoon/notice-board/notices/'+ id)
+    fetch('http://localhost:9999/notices/'+ id)
       .then(response => response.json())
       .then(result => {
         console.log(result);
@@ -34,7 +34,7 @@ export default function Update () {
       },
       body: JSON.stringify({ title, content, time }),
     };
-    fetch(`https://my-json-server.typicode.com/sungdongyoon/notice-board/notices/`+ id, options)
+    fetch(`http://localhost:9999/notices/`+ id, options)
       .then((response) => response.json())
       .then((result) => {
         console.log("result", result);

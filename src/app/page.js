@@ -11,10 +11,11 @@ const Page = () => {
   const [data, setData] = useState([]);
   useEffect(() => {
     setLoading(true);
-    fetch('/api/noticeData')
+    fetch('http://localhost:9999/notices/', {cache: "no-store"})
       .then(response => response.json())
       .then(result => {
-        setData(result)
+        setData([...result].reverse());
+        setLoading(false);
       })
   }, [])
   console.log("data", data);
