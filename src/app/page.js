@@ -13,12 +13,11 @@ const Page = () => {
     setLoading(true);
     fetch('http://localhost:9999/notices/', {cache: "no-store"})
       .then(response => response.json())
-      .then(result => {
+      .then(result => {``
         setData([...result].reverse());
         setLoading(false);
       })
   }, [])
-  console.log("data", data);
   
   const [page, setPage] = useState(1);
   const [currentPost, setCurrentPost] = useState([]);
@@ -93,5 +92,6 @@ const Page = () => {
     </div>
   )
 }
+
 
 export default Page;
